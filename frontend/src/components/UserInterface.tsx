@@ -5,36 +5,36 @@ import CardComponent from "./CardComponent";
 interface User{
     id: number;
     email: string;
-    name: string;
+    username: string;
 }
 
 interface UserInterfaceProps{
-    BackendName: string;
+    backendName: string;
 }
 
-const UserInterface: React.FC<UserInterfaceProps> = ({ BackendName }) => {
+const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     const [users, setUsers] = React.useState<User[]>([]);
-    const [newUser, setNewUser] = React.useState<User>({id: 0, email: '', name: ''});
-    const [updateUser, setUpdateUser] = React.useState<User>({id: 0, email: '', name: ''});
+    const [newUser, setNewUser] = useState({ username: '', email: '' , password: ''});
+    const [updateUser, setUpdateUser] = useState({ id: '', username: '', email: '' , password: ''});
 
-    const backgroundColor: { [ key: string ]: string } = {
+    const backgroundColors: { [ key: string ]: string } = {
         flask: 'bg-blue-500',
     };
     
     const buttonColors: { [ key: string ]: string } = {
-        flask: 'bg-ble-700 hover:bg-blue-600',
+        flask: 'bg-blue-700 hover:bg-blue-600',
     };
 
-    const bgColor = backgroundColor[BackendName as keyof typeof backgroundColor] || 'bg-gray-500';
-    const btnColor = buttonColors[BackendName as keyof typeof buttonColors] || 'bg-ble-700 hover:bg-blue-600';
+    const bgColor = backgroundColors[backendName as keyof typeof backgroundColors] || 'bg-gray-200';
+    const btnColor = buttonColors[backendName as keyof typeof buttonColors] || 'bg-gray-500 hover:bg-gray-600';
 
     //fetch users
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get(`${apiUrl}/api/${BackendName}/users`);
+                const response = await axios.get(`${apiUrl}/api/${backendName}/users`);
                 setUsers(response.data.reverse());
             }catch(error){
                 console.log('Error: ', error);
@@ -42,23 +42,122 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ BackendName }) => {
         };
 
         fetchData();
-    }, [BackendName, apiUrl]);
+    }, [backendName, apiUrl]);
+
+     // Create user
+  const createUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`${apiUrl}/api/${backendName}/users`, newUser);
+      setUsers([response.data, ...users]);
+      setNewUser({ username: '', email: '' , password: ''});
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
+  };
+
+  // update user
+  const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await axios.put(`${apiUrl}/api/${backendName}/users/${updateUser.id}`, { username: updateUser.username, email: updateUser.email , password: updateUser.password});
+      setUpdateUser({ id: '', username: '', email: '' , password: ''});
+      setUsers(
+        users.map((user) => {
+          if (user.id === parseInt(updateUser.id)) {
+            return { ...user, username: updateUser.username, email: updateUser.email , password: updateUser.password};
+          }
+          return user;
+        })
+      );
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  // Delete user
+  const deleteUser = async (userId: number) => {
+    try {
+      await axios.delete(`${apiUrl}/api/${backendName}/users/${userId}`);
+      setUsers(users.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
 
     return (
-       <div className={`user-interface ${bgColor} ${BackendName} w-full max-w-md p-4 my-4 rounded shadow`}>
-        <img src={`/${BackendName} logo.svg`} alt={`${BackendName} Logo`} className="w-20 h-20 mb-6 mx-auto" />
-        <h2 className="text-xl font-bold text-center text-white mb-6">{`${BackendName.charAt(0).toUpperCase() + BackendName.slice(1)} Backend`}</h2>
-       
-       {/* Display users*/}
-        <div className="space-y-4">
-        {users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between bg-white p-4">
-                <CardComponent card={user} />
-                <button onClick={() => deleteUser(user.id)} className={`${btnColor} `}>Delete User</button>
-            </div>
-        ))}
-       </div>
-       </div>
+        <div className={`user-interface ${bgColor} ${backendName} w-full max-w-md p-4 my-4 rounded shadow`}>
+            <img src={`/${backendName}logo.svg`} alt={`${backendName} Logo`} className="w-20 h-20 mb-6 mx-auto" />
+            <h2 className="text-xl font-bold text-center text-white mb-6">{`${backendName.charAt(0).toUpperCase() + backendName.slice(1)} Backend`}</h2>
+
+            {/* Create user */}
+            <form onSubmit={createUser} className="mb-6 p-4 bg-blue-100 rounded shadow">
+                <input
+                placeholder="Name"
+                value={newUser.username}
+                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                placeholder="Email"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                placeholder="Password"
+                value={newUser.password}
+                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <button type="submit" className="w-full p-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+                Add User
+                </button>
+            </form>
+
+            {/* Update user */}
+            <form onSubmit={handleUpdateUser} className="mb-6 p-4 bg-blue-100 rounded shadow">
+                <input
+                placeholder="User Id"
+                value={updateUser.id}
+                onChange={(e) => setUpdateUser({ ...updateUser, id: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                placeholder="Name"
+                value={updateUser.username}
+                onChange={(e) => setUpdateUser({ ...updateUser, username: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                placeholder="Email"
+                value={updateUser.email}
+                onChange={(e) => setUpdateUser({ ...updateUser, email: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <input
+                placeholder="Password"
+                value={updateUser.password}
+                onChange={(e) => setUpdateUser({ ...updateUser, password: e.target.value })}
+                className="mb-2 w-full p-2 border border-gray-300 rounded"
+                />
+                <button type="submit" className="w-full p-2 text-white bg-green-500 rounded hover:bg-green-600">
+                Update User
+                </button>
+            </form>
+
+            {/* Display users */}
+            <div className="space-y-4">
+                {users.map((user) => (
+                <div key={user.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
+                    <CardComponent card={user} />
+                    <button onClick={() => deleteUser(user.id)} className={`${btnColor} text-white py-2 px-4 rounded`}>
+                    Delete User
+                    </button>
+                </div>
+                ))}
+             </div>
+        </div>
     );
-};
+}
 export default UserInterface;
