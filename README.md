@@ -4,7 +4,7 @@
 
 ## English
 
-# 🚀 Web Application with Next.js, Flask, and PostgreSQL 🌐
+# 🚀 Web Application with Next.js, Flask, & PostgreSQL 🌐
 
 Welcome to the repository of our amazing web application! This project utilizes the Next.js framework for the frontend, Flask for the backend, and PostgreSQL as the database. Everything is orchestrated and run in Docker containers with the `docker-compose.yml` file.
 
