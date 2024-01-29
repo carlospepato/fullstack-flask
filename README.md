@@ -30,3 +30,8 @@ Antes de começar, certifique-se de ter o Docker e o Docker Compose instalados e
 
 ```bash
 docker-compose up -d
+```
+
+# 📝 Contato
+**Nome:** Carlos Eduardo Pepato.  
+**Linkedin:** https://www.linkedin.com/in/carlos-eduardo-pepato-9025b8150/
