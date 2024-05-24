@@ -2,7 +2,7 @@
 - [English](#english)
 - [Português](#portuguese)
 
-## English 🇺🇸
+## English :us:
 
 # 🚀 Web Application with Next.js, Flask & PostgreSQL 🌐
 
